@@ -1,10 +1,15 @@
-// modified from: https://www.arduino.cc/en/tutorial/files
+// modified from: https://www.arduino.cc/en/Tutorial/ReadWrite
 
-#define MAX_FILE_LENGTH 10
-File file;
+#include <SPI.h>
+#include <SD.h>
+
+#define MAX_FILE_LENGTH 20
+File myFile;
 int fileIdx = -1;
 String fileName;
-char* filePath;
+char* filePath = new char[MAX_FILE_LENGTH];
+
+#define headerStr "testing 1, 2, 3."
 
 void initSD() {
   Serial.print("Initializing SD card...");
@@ -14,27 +19,60 @@ void initSD() {
     while (1);
   }
   Serial.println("initialization done.");
-  
+
   while(SD.exists(nextFileName())) {
     Serial.println(fileName + " exists.");
   }
   Serial.println(fileName + " doesn't exist.");
 
-  // open a new file and immediately close it:
-  Serial.println("Creating " + fileName + "...");
-  file = SD.open(filePath, FILE_WRITE);
-  file.println("test");
-  file.close();
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  myFile = SD.open(filePath, FILE_WRITE);
 
-  // testing:
-  Serial.println("opening file ");
-
-  // Check to see if the file exists:
-  if (SD.exists(filePath)) {
-    Serial.println(fileName + " exists.");
+  // if the file opened okay, write to it:
+  if (myFile) {
+    Serial.print("Writing header to " + fileName + "...");
+    myFile.println(headerStr);
+    Serial.println("done.");
   } else {
-    Serial.println(fileName + " doesn't exist.");
+    // if the file didn't open, print an error:
+    Serial.println("error opening " + fileName);
+    while(1);
   }
+}
+
+void printLineToFile(char* msg) {
+  if(myFile) {
+    myFile.println(msg);
+  } else {
+    Serial.println("error printing to " + fileName);
+  }
+}
+
+void printFileToSerial() {
+  myFile.close();
+  delay(1);
+  myFile = SD.open(filePath);
+  if (myFile) {
+    Serial.println(fileName + ":");
+
+    // read from the file until there's nothing else in it:
+    while (myFile.available()) {
+      Serial.write(myFile.read());
+    }
+    // close the file:
+    myFile.close();
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening " + fileName);
+  }
+  myFile.close();
+  delay(1);
+  myFile = SD.open(filePath, FILE_WRITE);
+}
+
+void closeFile() {
+  myFile.close();
 }
 
 char* nextFileName() {
