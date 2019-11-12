@@ -9,7 +9,8 @@ int fileIdx = -1;
 String fileName;
 char* filePath = new char[MAX_FILE_LENGTH];
 
-#define headerStr "testing 1, 2, 3."
+#define IMU_LOG_HEADER_STRING "Orientation X (deg),Orientation Y (deg),Orientation Z (deg),Ang Vel X,Ang Vel Y,Ang Vel Z,Accel X,Accel Y,Accel Z,Lin Accel X,Lin Accel Y,Lin Accel Z,Temperature (deg F)"
+#define headerStr (IMU_LOG_HEADER_STRING)
 
 void initSD() {
   Serial.print("Initializing SD card...");
@@ -41,7 +42,7 @@ void initSD() {
   }
 }
 
-void printLineToFile(char* msg) {
+void printLineToFile(String msg) {
   if(myFile) {
     myFile.println(msg);
   } else {
@@ -71,6 +72,12 @@ void printFileToSerial() {
   myFile = SD.open(filePath, FILE_WRITE);
 }
 
+void saveSDFile(void) {
+  myFile.close();
+  delay(1);
+  myFile = SD.open(filePath, FILE_WRITE);
+}
+
 void closeFile() {
   myFile.close();
 }
@@ -81,7 +88,7 @@ char* nextFileName() {
   if(fileIdx < 10) fileName = fileName + "0";
   if(fileIdx < 100) fileName = fileName + "0";
   fileName = fileName + String(fileIdx);
-  fileName = fileName + ".txt";
+  fileName = fileName + ".csv";
   fileName.toCharArray(filePath, MAX_FILE_LENGTH);
   return filePath;
 }

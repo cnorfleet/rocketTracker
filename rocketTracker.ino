@@ -9,20 +9,15 @@ void setup() {
     ; // wait for serial port to connect
   }
   initSD();
-  //initIMU();
+  initIMU();
   //initGPS();
-  printLineToFile("memes");
-  printLineToFile("testing");
-  printLineToFile("file writing and stuff \n new line?");
-  printLineToFile("end of file");
-  printFileToSerial();
-  printLineToFile("testing");
-  printFileToSerial();
+  delay(1000); // for IMU startup
 }
 
 void loop() {
   //printIMUData();
+  printLineToFile(getIMUDataStr());
+  saveSDFile(); // temporary workaround because apparently the file only saves if it gets closed
   //readGPS();
-  delay(1000);
-  //Serial.println("b");
+  delay(100);
 }
