@@ -52,7 +52,7 @@ void initIMU(void)
   delay(1000);
 }
 
-void readIMU(void)
+void printIMUData(void)
 {
   //could add VECTOR_ACCELEROMETER, VECTOR_MAGNETOMETER,VECTOR_GRAVITY...
   sensors_event_t orientationData , angVelocityData , linearAccelData;
