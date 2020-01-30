@@ -46,7 +46,29 @@ void initIMU(void)
     Serial.print("\nOoops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
-  Serial.println("done");
+  Serial.println("done!");
+}
+
+void updateIMUData(struct imuStateType &imuState) {
+  //could add VECTOR_MAGNETOMETER, VECTOR_GRAVITY...
+  sensors_event_t orientationData, angVelocityData, accelData, linearAccelData;
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
+  bno.getEvent(&accelData,       Adafruit_BNO055::VECTOR_ACCELEROMETER);
+  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
+
+  getIMUEventData(&orientationData, &(imuState.orientation.x),
+                  &(imuState.orientation.y), &(imuState.orientation.z));
+  getIMUEventData(&angVelocityData, &(imuState.angVel.x),
+                  &(imuState.angVel.y), &(imuState.angVel.z));
+  getIMUEventData(&accelData, &(imuState.accelWithGravity.x),
+                  &(imuState.accelWithGravity.y), &(imuState.accelWithGravity.z));
+  getIMUEventData(&linearAccelData, &(imuState.linearAccel.x),
+                  &(imuState.linearAccel.y), &(imuState.linearAccel.z));
+
+  imuState.temperature = bno.getTemp();
+  
+  //delay(BNO055_SAMPLERATE_DELAY_MS);
 }
 
 void printIMUData(void)
@@ -58,9 +80,14 @@ void printIMUData(void)
   bno.getEvent(&accelData,       Adafruit_BNO055::VECTOR_ACCELEROMETER);
   bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
 
+  Serial.println();
+  Serial.print("orientation: ");
   printIMUEvent(&orientationData);
+  Serial.print("angVel: ");
   printIMUEvent(&angVelocityData);
+  Serial.print("accelWithGrav: ");
   printIMUEvent(&accelData);       // with gravity
+  Serial.print("accelNoGrav: ");
   printIMUEvent(&linearAccelData); // without gravity
 
   int8_t boardTemp = bno.getTemp();
