@@ -15,6 +15,8 @@ void printStatusToSerial(struct rocketStateType &rocketState) {
     nextInterval = 1500 + random(1000);
     
     Serial.println();
+    Serial.println("File name: " + fileName); // +
+                   //String(fileError ? "" : " - error writing to file");
     printGPSData(rocketState.gpsState);
     Serial.println();
     printIMUData(rocketState.imuState);

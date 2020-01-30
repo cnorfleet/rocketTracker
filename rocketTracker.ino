@@ -60,12 +60,8 @@ void setup() {
 }
 
 void loop() {
-  //printLineToFile(getIMUDataStr());
   updateGPSData(rocketState.gpsState);
   updateIMUData(rocketState.imuState);
-  //printIMUData();
   printStatusToSerial(rocketState);
-  //printStatusToFile(rocketState);
-  //printLineToFile(getGPSDataStr());
-  //saveSDFile(); // temporary workaround because apparently the file only saves if it gets closed
+  printStatusToFile(rocketState);
 }
