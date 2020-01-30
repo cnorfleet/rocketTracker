@@ -8,8 +8,9 @@ File myFile;
 int fileIdx = -1;
 String fileName;
 char* filePath = new char[MAX_PATH_LENGTH];
+boolean fileError = false;
 
-#define GPS_LOG_HEADER_STRING "aa"
+#define GPS_LOG_HEADER_STRING "Date,Time (UTC),Year,Month,Day,Hour,Minute,Second,Sat Fix,Quality,Seconds Since Last Fix,Number of Satellites,Location,Latitude,Longitude,Speed (Knots),Angle,Altitude (meters)"
 #define IMU_LOG_HEADER_STRING "Orientation X (deg),Orientation Y (deg),Orientation Z (deg),Ang Vel X,Ang Vel Y,Ang Vel Z,Accel X,Accel Y,Accel Z,Lin Accel X,Lin Accel Y,Lin Accel Z,Temperature (deg F)"
 
 uint32_t timerSD = millis();
@@ -35,6 +36,8 @@ void initSD() {
   // if the file opened okay, write to it:
   if (myFile) {
     Serial.print("Writing header to " + fileName + "...");
+    myFile.print(GPS_LOG_HEADER_STRING);
+    myFile.print(",");
     myFile.println(IMU_LOG_HEADER_STRING);
     closeFile();
     Serial.println("done.");
@@ -49,35 +52,54 @@ void printStatusToFile(struct rocketStateType &rocketState) {
   // if millis() or timer wraps around, we'll just reset it
   if (timerSD > millis()) timerSD = millis();
 
-  // approximately every 2 seconds or so, random intervals, print out the current stats
+  // approximately every 2 seconds or so, random intervals
   static unsigned nextInterval = 2000;
   if (millis() - timerSD > nextInterval) {
     timerSD = millis(); // reset the timer
     nextInterval = 1500 + random(1000);
 
     openFile();
-//    printLineToFile(getGPSDataStr(rocketState.gpsState));
-    printLineToFile(getIMUDataStr(rocketState.imuState));
-    closeFile();
+    if(myFile) {
+      fileError = false;
+      myFile.print(getGPSDataStr(rocketState.gpsState) + ",");
+      myFile.println(getIMUDataStr(rocketState.imuState));
+    } else {
+      fileError = true;
     }
+    closeFile();
+  }
+}
+
+String getGPSDataStr(const struct gpsStateType &gpsState) {
+  String out = "";
+  out = out + gpsState.date + "," + gpsState.timeUTC + ",";
+  out = out + String(gpsState.gpsTime.yr) + "," + String(gpsState.gpsTime.mth) +
+        "," + String(gpsState.gpsTime.d)  + "," + String(gpsState.gpsTime.h) +
+        "," + String(gpsState.gpsTime.m)  + "," + String(gpsState.gpsTime.s) + ",";
+  out = out + String(gpsState.satFix) + "," + String(gpsState.quality) +
+        "," + String(gpsState.secondsSinceFix) +
+        "," + String(gpsState.numSats) + ",";
+  out = out + gpsState.location + ",";
+  out = out + ((gpsState.lat=='N') ? "+" : "-") + String(gpsState.latitude) +
+        "," + ((gpsState.lon=='E') ? "+" : "-") + String(gpsState.longitude) + ",";
+  out = out + String(gpsState.speedKnots) +
+        "," + String(gpsState.angle) +
+        "," + String(gpsState.altitude);
+  return out;
 }
 
 String getIMUDataStr(const struct imuStateType &imuState) {
-  sensors_event_t orientationData, angVelocityData, accelData, linearAccelData;
-  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
-  bno.getEvent(&angVelocityData, Adafruit_BNO055::VECTOR_GYROSCOPE);
-  bno.getEvent(&accelData,       Adafruit_BNO055::VECTOR_ACCELEROMETER);
-  bno.getEvent(&linearAccelData, Adafruit_BNO055::VECTOR_LINEARACCEL);
-  sensors_event_t* data[] = { &orientationData, &angVelocityData, &accelData, &linearAccelData };
-  int8_t boardTemp = bno.getTemp();
-
+  threeAxisDataType data[] = { imuState.orientation,
+                               imuState.angVel,
+                               imuState.accelWithGravity,
+                               imuState.linearAccel};
   String out = "";
   for(int i = 0; i < 4; i++) {
-    double x, y, z;
-    getIMUEventData(data[i], &x, &y, &z);
-    out = out + String(x) + "," + String(y) + "," + String(z) + ",";
+    out = out + String(data[i].x) + "," +
+                String(data[i].y) + "," +
+                String(data[i].z) + ",";
   }
-  out = out + String(boardTemp);
+  out = out + String(imuState.temperature);
   return out;
 }
 

@@ -44,8 +44,6 @@ struct imuStateType {
 struct rocketStateType {
   struct gpsStateType gpsState;
   struct imuStateType imuState;
-  
-  // general info
 } rocketState;
 
 void setup() {
