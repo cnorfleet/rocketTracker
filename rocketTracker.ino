@@ -60,6 +60,8 @@ void setup() {
 void loop() {
   updateGPSData(rocketState.gpsState);
   updateIMUData(rocketState.imuState);
+
+  
   printStatusToSerial(rocketState);
   printStatusToFile(rocketState);
 }
