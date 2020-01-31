@@ -75,5 +75,4 @@ void loop() {
     lastTime = currentTime;
     printedSerialYet = false;
   }
-  delay(10);
 }

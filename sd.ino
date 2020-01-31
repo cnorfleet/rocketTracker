@@ -16,11 +16,12 @@ boolean fileError = false;
 void initSD() {
   Serial.print("Initializing SD card...");
 
-  if (!SD.begin()) {
+  while (!SD.begin()) {
     Serial.println("initialization failed!");
-    while (1);
+    delay(100);
+    Serial.print("Initializing SD card...");
   }
-  Serial.println("initialization done.");
+  Serial.println("initialization done!");
 
   while(SD.exists(nextFileName())) {
     Serial.println(fileName + " exists.");

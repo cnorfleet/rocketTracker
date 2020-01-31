@@ -16,11 +16,12 @@ void initIMU(void)
 {
   /* Initialise the sensor */
   Serial.print("Initializing IMU...");
-  if (!bno.begin())
+  while(!bno.begin())
   {
     /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("\nOoops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-    while(1);
+    Serial.println("no BNO055 detected.");
+    delay(100);
+    Serial.print("Initializing IMU...");
   }
   Serial.println("done!");
 }
