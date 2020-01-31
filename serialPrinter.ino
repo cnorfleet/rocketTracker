@@ -1,7 +1,13 @@
-uint32_t timer = millis();
-
 void initSerialPrinter(void) {
-  
+  Serial.begin(9600);
+  unsigned long startTime = millis();
+  while (!Serial) {
+    // wait for serial port to connect
+    if(startTime - millis() > 1000) {
+      // if taking too long we should probably just move on
+      return;
+    }
+  }
 }
 
 void printStatusToSerial(struct rocketStateType &rocketState) {
