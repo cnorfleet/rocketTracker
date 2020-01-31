@@ -13,8 +13,6 @@ boolean fileError = false;
 #define GPS_LOG_HEADER_STRING "Date,Time (UTC),Year,Month,Day,Hour,Minute,Second,Sat Fix,Quality,Seconds Since Last Fix,Number of Satellites,Latitude,Longitude,Speed (Knots),Angle,Altitude (meters)"
 #define IMU_LOG_HEADER_STRING "Orientation X (deg),Orientation Y (deg),Orientation Z (deg),Ang Vel X,Ang Vel Y,Ang Vel Z,Accel X,Accel Y,Accel Z,Lin Accel X,Lin Accel Y,Lin Accel Z,Temperature (deg F)"
 
-uint32_t timerSD = millis();
-
 void initSD() {
   Serial.print("Initializing SD card...");
 
@@ -49,25 +47,19 @@ void initSD() {
 }
 
 void printStatusToFile(struct rocketStateType &rocketState) {
-  // if millis() or timer wraps around, we'll just reset it
-  if (timerSD > millis()) timerSD = millis();
-
-  // approximately every 2 seconds or so, random intervals
-  static unsigned nextInterval = 2000;
-  if (millis() - timerSD > nextInterval) {
-    timerSD = millis(); // reset the timer
-    nextInterval = 1500 + random(1000);
-
-    openFile();
-    if(myFile) {
-      fileError = false;
-      myFile.print(getGPSDataStr(rocketState.gpsState) + ",");
-      myFile.println(getIMUDataStr(rocketState.imuState));
-    } else {
-      fileError = true;
-    }
-    closeFile();
+  if(fileError) {
+    SD.begin();
+    delay(1);
   }
+  openFile();
+  if(myFile) {
+    fileError = false;
+    myFile.print(getGPSDataStr(rocketState.gpsState) + ",");
+    myFile.println(getIMUDataStr(rocketState.imuState));
+  } else {
+    fileError = true;
+  }
+  closeFile();
 }
 
 String getGPSDataStr(const struct gpsStateType &gpsState) {

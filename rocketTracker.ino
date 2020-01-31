@@ -4,6 +4,8 @@
 #include <utility/imumaths.h>
 #include <Adafruit_GPS.h>
 
+#define PRINT_TO_SERIAL true // for debug
+
 struct gpsTimeType {
   float s;
   int m, h, d, mth, yr;
@@ -57,11 +59,21 @@ void setup() {
   delay(1000); // for IMU startup
 }
 
+unsigned long lastTime = millis();
+boolean printedSerialYet = false;
+
 void loop() {
   updateGPSData(rocketState.gpsState);
   updateIMUData(rocketState.imuState);
 
-  
-  printStatusToSerial(rocketState);
-  printStatusToFile(rocketState);
+  unsigned long currentTime = millis();
+  if(PRINT_TO_SERIAL and ((currentTime-lastTime)>50) and (not printedSerialYet)) {
+    printStatusToSerial(rocketState);
+    printedSerialYet = true;
+  } else if ((currentTime-lastTime)>100) {
+    printStatusToFile(rocketState);
+    lastTime = currentTime;
+    printedSerialYet = false;
+  }
+  delay(10);
 }

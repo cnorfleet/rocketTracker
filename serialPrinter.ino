@@ -5,23 +5,13 @@ void initSerialPrinter(void) {
 }
 
 void printStatusToSerial(struct rocketStateType &rocketState) {
-  // if millis() or timer wraps around, we'll just reset it
-  if (timer > millis()) timer = millis();
-
-  // approximately every 2 seconds or so, random intervals, print out the current stats
-  static unsigned nextInterval = 2000;
-  if (millis() - timer > nextInterval) {
-    timer = millis(); // reset the timer
-    nextInterval = 1500 + random(1000);
-    
-    Serial.println();
-    Serial.println("File name: " + fileName +
-                   String(fileError ? " - error writing to file" : ""));
-    printGPSData(rocketState.gpsState);
-    Serial.println();
-    printIMUData(rocketState.imuState);
-    Serial.println();
-  }
+  Serial.println();
+  Serial.println("File name: " + fileName +
+                 String(fileError ? " - error writing to file" : ""));
+  printGPSData(rocketState.gpsState);
+  Serial.println();
+  printIMUData(rocketState.imuState);
+  Serial.println();
 }
 
 void printGPSData(const struct gpsStateType &gpsState) {
