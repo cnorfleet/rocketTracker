@@ -12,6 +12,7 @@ boolean fileError = false;
 
 #define GPS_LOG_HEADER_STRING "Date,Time (UTC),Year,Month,Day,Hour,Minute,Second,Sat Fix,Quality,Seconds Since Last Fix,Number of Satellites,Latitude,Longitude,Speed (Knots),Angle,Altitude (meters)"
 #define IMU_LOG_HEADER_STRING "Orientation X (deg),Orientation Y (deg),Orientation Z (deg),Ang Vel X,Ang Vel Y,Ang Vel Z,Accel X,Accel Y,Accel Z,Lin Accel X,Lin Accel Y,Lin Accel Z,Temperature (deg F)"
+#define RKT_LOG_HEADER_STRING "Battery Voltage (V)"
 
 void initSD() {
   Serial.print("Initializing SD card...");
@@ -37,7 +38,9 @@ void initSD() {
     Serial.print("Writing header to " + fileName + "...");
     myFile.print(GPS_LOG_HEADER_STRING);
     myFile.print(",");
-    myFile.println(IMU_LOG_HEADER_STRING);
+    myFile.print(IMU_LOG_HEADER_STRING);
+    myFile.print(",");
+    myFile.println(RKT_LOG_HEADER_STRING);
     closeFile();
     Serial.println("done.");
   } else {
@@ -56,7 +59,8 @@ void printStatusToFile(struct rocketStateType &rocketState) {
   if(myFile) {
     fileError = false;
     myFile.print(getGPSDataStr(rocketState.gpsState) + ",");
-    myFile.println(getIMUDataStr(rocketState.imuState));
+    myFile.print(getIMUDataStr(rocketState.imuState) + ",");
+    myFile.println(getOtherDataStr(rocketState));
   } else {
     fileError = true;
   }
@@ -93,6 +97,10 @@ String getIMUDataStr(const struct imuStateType &imuState) {
   }
   out = out + String(imuState.temperature);
   return out;
+}
+
+String getOtherDataStr(const struct rocketStateType &rocketState) {
+  return String(rocketState.batteryVoltage);
 }
 
 void printLineToFile(String msg) {

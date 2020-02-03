@@ -6,6 +6,8 @@
 
 #define PRINT_TO_SERIAL true // for debug
 
+#define BATTERY_MON_PIN A8 // battery voltage monitoring
+
 struct gpsTimeType {
   float s;
   int m, h, d, mth, yr;
@@ -38,21 +40,28 @@ struct threeAxisDataType {
 struct imuStateType {
   struct threeAxisDataType orientation;
   struct threeAxisDataType angVel;
-  struct threeAxisDataType accelWithGravity;
-  struct threeAxisDataType linearAccel; // w/o gravity
+  struct threeAxisDataType accelWithGravity; // accel vector
+  struct threeAxisDataType linearAccel;      // accel w/o gravity
   int8_t temperature; // board temp
 };
 
 struct rocketStateType {
   struct gpsStateType gpsState;
   struct imuStateType imuState;
+  float batteryVoltage;
 } rocketState;
+
+void updateBatteryVoltage(void) {
+  rocketState.batteryVoltage = analogRead(BATTERY_MON_PIN) * 2.0 * 3.3/1024.0;
+}
 
 void setup() {
   initSerialPrinter();
   initSD();
   initIMU();
   initGPS();
+  pinMode(BATTERY_MON_PIN, INPUT);
+  updateBatteryVoltage();
   delay(1000); // for IMU startup
 }
 
@@ -69,6 +78,7 @@ void loop() {
     printedSerialYet = true;
   } else if ((currentTime-lastTime)>100) {
     printStatusToFile(rocketState);
+    updateBatteryVoltage();
     lastTime = currentTime;
     printedSerialYet = false;
   }

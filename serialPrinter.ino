@@ -14,6 +14,9 @@ void printStatusToSerial(struct rocketStateType &rocketState) {
   Serial.println();
   Serial.println("File name: " + fileName +
                  String(fileError ? " - error writing to file" : ""));
+  Serial.println("Battery voltage: " +
+                 String(rocketState.batteryVoltage, 4) + " V");
+  Serial.println();
   printGPSData(rocketState.gpsState);
   Serial.println();
   printIMUData(rocketState.imuState);
@@ -34,8 +37,8 @@ void printGPSData(const struct gpsStateType &gpsState) {
   while(m > 60){ m -= 60; h++; }
   while(h > 24){ h -= 24; d++; }
   // ISO Standard Date Format, with leading zeros https://xkcd.com/1179/ 
-  Serial.println("\nDate: " + gpsState.date +
-                "   Time: " + gpsState.timeUTC);
+  Serial.println("Date: " + gpsState.date +
+              "   Time: " + gpsState.timeUTC);
   Serial.println("Fix: " + String(gpsState.satFix == 1 ? "yes," : "no, ") +
                 " quality: " + String(gpsState.quality) +
                 ", satellites: " + String(gpsState.numSats));
