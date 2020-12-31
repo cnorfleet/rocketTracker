@@ -1,3 +1,9 @@
+// for board: Teensy 4.0
+
+// note: GPS saves location in decimal minutes format
+// if data recieved is: 3547.9902  -7845.6362
+// then type into google maps: +35 47.9902',-78 45.6362'
+
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
@@ -23,14 +29,14 @@ struct gpsStateType {
   unsigned long secondsSinceFix;
   int numSats; // number of satellites
 
-  String location;
+  String location; // location string for google maps
   float latitude;
   char lat; // either N or S
   float longitude;
   char lon; // either W or E
   float speedKnots; // knots
   float angle;      // degrees
-  float altitude;   // meters I think?
+  float altitude;   // meters (I think?)
 };
 
 struct threeAxisDataType {

@@ -10,7 +10,7 @@ String fileName;
 char* filePath = new char[MAX_PATH_LENGTH];
 boolean fileError = false;
 
-#define GPS_LOG_HEADER_STRING "Date,Time (UTC),Year,Month,Day,Hour,Minute,Second,Sat Fix,Quality,Seconds Since Last Fix,Number of Satellites,Latitude,Longitude,Speed (Knots),Angle,Altitude (meters)"
+#define GPS_LOG_HEADER_STRING "Date,Time (UTC),Year,Month,Day,Hour,Minute,Second,Sat Fix,Quality,Seconds Since Last Fix,Number of Satellites,Latitude,Longitude,Location String,Speed (Knots),Angle,Altitude (meters)"
 #define IMU_LOG_HEADER_STRING "Orientation X (deg),Orientation Y (deg),Orientation Z (deg),Ang Vel X,Ang Vel Y,Ang Vel Z,Accel X,Accel Y,Accel Z,Lin Accel X,Lin Accel Y,Lin Accel Z,Temperature (deg F)"
 #define RKT_LOG_HEADER_STRING "Battery Voltage (V)"
 
@@ -78,6 +78,7 @@ String getGPSDataStr(const struct gpsStateType &gpsState) {
         "," + String(gpsState.numSats) + ",";
   out = out + ((gpsState.lat=='N') ? "+" : "-") + String(gpsState.latitude, 4) +
         "," + ((gpsState.lon=='E') ? "+" : "-") + String(gpsState.longitude,4) + ",";
+  out = out + gpsState.location + ",";
   out = out + String(gpsState.speedKnots) +
         "," + String(gpsState.angle) +
         "," + String(gpsState.altitude);

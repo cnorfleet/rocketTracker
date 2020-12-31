@@ -78,7 +78,7 @@ void updateGPSData(struct gpsStateType &gpsState) {
   adjustTimeAndDate(yr, mth, d, h, m, s);
   
   // ISO Standard Date Format, with leading zeros https://xkcd.com/1179/
-  gpsState.date = String(GPS.year+2000) + "-" +
+  gpsState.date = String(yr+2000) + "-" +
                       ((mth < 10) ? "0" : "") + String(mth) + "-" +
                       ((d   < 10) ? "0" : "") + String(d);
   gpsState.timeUTC =  ((h   < 10) ? "0" : "") + String(h) + ":" +
@@ -92,8 +92,12 @@ void updateGPSData(struct gpsStateType &gpsState) {
     gpsState.lat = GPS.lat;
     gpsState.longitude = GPS.longitude;
     gpsState.lon = GPS.lon;
-    gpsState.location = String(gpsState.latitude, 4) + String(gpsState.lat) + ", " +
-                        String(gpsState.longitude, 4) + String(gpsState.lon);
+    gpsState.location = String(gpsState.latitude/100, 0) + " " +
+                        String(fmod(gpsState.latitude, 100), 4) + "\' " +
+                        String(gpsState.lat) + " " +
+                        String(gpsState.longitude/100, 0) + " " +
+                        String(fmod(gpsState.longitude, 100.0), 4) + "\' " +
+                        String(gpsState.lon);
     gpsState.speedKnots = GPS.speed;
     gpsState.angle = GPS.angle;
     gpsState.altitude = GPS.altitude;
